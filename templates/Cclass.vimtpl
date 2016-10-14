@@ -1,0 +1,8 @@
+class	VIMHASTOREPLACE
+{
+	public:
+		VIMHASTOREPLACE();
+		~VIMHASTOREPLACE();
+	protected:
+	private:
+}
