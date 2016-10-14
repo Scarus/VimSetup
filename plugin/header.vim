@@ -5,7 +5,7 @@
 ""  Login						: dio
 ""
 ""  Started						: [Sun 09 Oct 2016 01:42:06]
-""  Last modification		: [Sun 09 Oct 2016 22:44:10]
+""  Last modification		: [Fri 14 Oct 2016 22:08:15]
 ""
 
 "notes:
@@ -45,7 +45,7 @@ function InsertHeader()
 	endif
 
 	"replace fillers
-	execute "%substitute/USERFNAME \"USERNNAME\" USERLNAME/".g:userFirstName." ".g:userNickName." ".g:userLastName."/"
+	execute "%substitute/USERFNAME \"USERNNAME\" USERLNAME/".g:userFirstName." \"".g:userNickName."\" ".g:userLastName."/"
 	%substitute/CURRENTFILENAME/\=s:file
 	%substitute/CURRENTFILEPATH/\=expand('%:p')
 	%substitute/USERLOGIN/\=$USER/
