@@ -5,59 +5,51 @@
 ""  Login						: dio
 ""
 ""  Started						: [Sun 09 Oct 2016 01:42:06]
-""  Last modification		: [Fri 14 Oct 2016 22:08:15]
+""  Last modification		: [Thu 27 Oct 2016 22:19:16]
 ""
-
-"notes:
-" => "%" permet aussi designer le nom du fichier, "expand" permet de formater des caractères spéciaux comme celui là => ":help expand"
-" => utiliser "\=" dans une ligne de recherche permet d'interpréter une variable
-" pour insérer son résultat dans la ligne
-" l'autre solution consiste à utiliser utiliser "execute" pour executer l'expression en concatenant tout
 
 function InsertHeader()
 	let s:ext = expand('%:e')
 	let s:file = expand('%:t')
-	"copie le contenu du template dans le fichier
-	"supprime la ligne vide au début
 
+	"copy the template at the beginning of the file
+	"delete the empty line at the file's first line
 	normal gg
-	if (s:ext == "pl" || s:ext == "PL")
-		execute Shebang("perl")
-		read $HOME/.vim/templates/headerDefault.vimtpl
-	elseif (s:ext == "py")
-		execute Shebang("python3")
-		read $HOME/.vim/templates/headerDefault.vimtpl
-	elseif (s:ext == "c" || s:ext == "cpp")
-		read $HOME/.vim/templates/headerC.vimtpl
-		normal ggdd
-	elseif (s:ext == "h" || s:ext == "hh")
-		read $HOME/.vim/templates/headerC.vimtpl
-		execute Includeguard(s:file)
-		normal ggdd
-	elseif (s:ext == "sh")
-		execute Shebang("sh")
-		read $HOME/.vim/templates/headerDefault.vimtpl
-	elseif (s:ext == "vim")
-		read $HOME/.vim/templates/headerVi.vimtpl
-		normal ggdd
-	else
-		read $HOME/.vim/templates/headerDefault.vimtpl
+	execute "read ".g:VIMTEMPLATES."headerDefault.vimtpl"
+	normal ggdd
+
+	"this 'if' statement is absolutely unneccesary unless you prefer your header commented
+	"using the pair '/*' and '*/' (it's my case).
+	if (s:ext != 'c' && s:ext != 'cpp' && s:ext != 'h' && s:ext != 'hh')
+		1,9substitute/^[\/\*][\*\/]/\=g:dictComments[s:ext]/
 	endif
 
-	"replace fillers
-	execute "%substitute/USERFNAME \"USERNNAME\" USERLNAME/".g:userFirstName." \"".g:userNickName."\" ".g:userLastName."/"
-	%substitute/CURRENTFILENAME/\=s:file
-	%substitute/CURRENTFILEPATH/\=expand('%:p')
-	%substitute/USERLOGIN/\=$USER/
-	%substitute/DATEOFTHEDAY/\=strftime("%a %d %b %Y %T", localtime())/
 
-	normal Go
-	"echo "Au Boulot feignasse!"
+	"replace fillers
+	let s:headerstart = 1
+	let s:headerend = 9
+	execute s:headerstart.",".s:headerend."substitute/USERFNAME \"USERNNAME\" USERLNAME/".g:userFirstName." \"".g:userNickName."\" ".g:userLastName."/"
+	1,9substitute/CURRENTFILENAME/\=s:file
+	1,9substitute/CURRENTFILEPATH/\=expand('%:p')
+	1,9substitute/USERLOGIN/\=$USER/
+	1,9substitute/DATEOFTHEDAY/\=strftime("%a %d %b %Y %T", localtime())/
+
+	"add an Include Guard if the file is a .h or .hh file
+	if (s:ext == 'h' || s:ext == 'hh')
+		call Includeguard(s:file)
+	endif
+
+	"add a Shebang if necessary
+	if (has_key(g:dictShebang, s:ext))
+		call Shebang(g:dictShebang[s:ext])
+	endif
+	normal G
 endfunction
 
 function Shebang(interp)
 	"add a shebang formated like this => #!/usr/bin/(interp)
-	execute "normal ggO#!/usr/bin/".a:interp
+	normal ggO
+	execute "normal 0d$i#!/usr/bin/".a:interp
 endfunction
 
 
@@ -65,20 +57,16 @@ function Includeguard(filename)
 	"if the file is a .h or a .hh, this function add basic include guards
 	normal Go
 	let s:fname = a:filename
-	"utiliser les simple quote et double quote autour du point produit un effet
-	"différent
 	let s:file = substitute(toupper(s:fname), '\.', "_", "")
 	echo s:fname
 
-	read $HOME/.vim/templates/includeguardC.vimtpl
-	%substitute/CURRENTHEADERNAME/\=s:file/g
+	execute "read ".g:VIMTEMPLATES."includeguardC.vimtpl"
+	.,.+3 substitute/CURRENTHEADERNAME/\=s:file/g
 endfunction
 
 function UpdateHeader()
 	"update last modification date
 	let s:curpos = getcurpos()
-	"note affiner la regexp afin de minimiser les chances de remplacer autre
-	"chose par erreur (et s'entrainer aux regexp)
 	let s:lastmod = "Last modification\t\t: [".strftime("%a %d %b %Y %T", localtime ())."]"
 	%substitute/Last modification\s\+:\s\+\[.*]/\=s:lastmod/e
 	call setpos('.', s:curpos)
