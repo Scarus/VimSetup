@@ -5,18 +5,14 @@
 ""  Login						: dio
 ""
 ""  Started						: [Sun 09 Oct 2016 01:42:06]
-""  Last modification		: [Fri 28 Oct 2016 11:11:49]
+""  Last modification		: [Fri 28 Oct 2016 12:00:28]
 ""
 
 function InsertHeader()
-	"get the file extension (c, cpp, pl, ...)
 	let s:ext = expand('%:e')
-	"get the file name
 	let s:file = expand('%:t')
-	"the path to the template file
+	let s:path = expand('%:p')
 	let s:tplFile = g:VIMTEMPLATES."headerDefault.vimtpl"
-	"the template file's number of lines which will be used to set the range
-	"for substitution operations.
 	let s:tplRg = FileLineNum(s:tplFile)
 
 	"copy the template at the beginning of the file
@@ -37,16 +33,14 @@ function InsertHeader()
 	execute "1,".s:tplRg."substitute/CURRENTFILENAME/".s:file
 	"" slashes in the path are interpreted so escape() has to be used to avoid
 	""it
-	execute "1,".s:tplRg."substitute/CURRENTFILEPATH/".escape(expand('%:p'), '/')
+	execute "1,".s:tplRg."substitute/CURRENTFILEPATH/".escape(s:path, '/')
 	execute "1,".s:tplRg."substitute/USERLOGIN/".$USER
 	execute "1,".s:tplRg."substitute/DATEOFTHEDAY/".strftime("%a %d %b %Y %T", localtime())
 
-	"add an Include Guard if the file is a .h or .hh file
 	if (s:ext == 'h' || s:ext == 'hh')
 		call Includeguard(s:file)
 	endif
 
-	"add a Shebang if necessary
 	if (has_key(g:dictShebang, s:ext))
 		call Shebang(g:dictShebang[s:ext])
 	endif
@@ -59,6 +53,15 @@ function Shebang(interp)
 	execute "normal 0d$i#!/usr/bin/".a:interp
 endfunction
 
+function ScriptExecRights()
+	""set the file permissions the same way as 'chmod 751 filename' if it is a
+	""script file
+	let s:path = expand('%:p')
+
+	if (has_key(g:dictShebang, expand('%:e')) && getfperm(s:path) != "rwxr-x--x")
+		call setfperm(s:path, "rwxr-x--x")
+	endif
+endfunction
 
 function Includeguard(filename)
 	"if the file is a .h or a .hh, this function add basic include guards
@@ -76,14 +79,11 @@ endfunction
 
 function UpdateHeader()
 	"update last modification date
-	"get the cursor current position
 	let s:curpos = getcurpos()
-	"get the last modification date
 	let s:lastmod = "Last modification\t\t: [".strftime("%a %d %b %Y %T", localtime ())."]"
 	let s:tplFile = g:VIMTEMPLATES."headerDefault.vimtpl"
 	let s:tplRge = FileLineNum(s:tplFile)
 
 	execute "1,".s:tplRge.'substitute/Last modification\s\+:\s\+\[.*]/'.s:lastmod
-	"the cursor is set to its initial position
 	call setpos('.', s:curpos)
 endfunction
