@@ -5,7 +5,7 @@
 ""  Login						: dio
 ""
 ""  Started						: [Sun 09 Oct 2016 01:42:06]
-""  Last modification		: [Fri 28 Oct 2016 00:22:42]
+""  Last modification		: [Fri 28 Oct 2016 11:11:49]
 ""
 
 function InsertHeader()
@@ -25,9 +25,11 @@ function InsertHeader()
 	execute "read ".s:tplFile
 	normal ggdd
 
-	"this 'if' statement is absolutely unneccesary unless you prefer your C headers commented using the pair '/*' and '*/' instead of '//' (it's my case).
+	"this first 'if' statement is absolutely unneccesary unless you prefer your C headers commented using the pair '/*' and '*/' instead of '//' (it's my case).
 	if (s:ext != 'c' && s:ext != 'cpp' && s:ext != 'h' && s:ext != 'hh')
-		execute "1,".s:tplRg."substitute/^[\/\*][\*\/]/".g:dictComments[s:ext]."/e"
+		if (has_key(g:dictComments, s:ext))
+			execute "1,".s:tplRg."substitute/^[\/\*][\*\/]/".g:dictComments[s:ext]."/e"
+		endif
 	endif
 
 	"replace fillers
