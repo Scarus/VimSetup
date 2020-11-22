@@ -8,6 +8,11 @@ set encoding=utf8
 " Configuration Section
 """""""""""""""""""""""""""""""""""""
 
+" change <leader> key from defaul \ to , (easier when using azerty kb)
+" useful to work with with cscope or nerdcommenter plugin
+let mapleader=","
+set timeout timeoutlen=1500
+
 " Show linenumbers
 set number
 set ruler
@@ -39,3 +44,21 @@ let g:syntastic_check_on_wq = 0
 """""""""""""""""""""""""""""""""""""
 map <C-b> :NERDTreeToggle<CR>
 map <C-m> :TagbarToggle<CR>
+
+"""""""""""""""""""""""""""""""""""""
+" list of installed plugins (with pacman)
+"""""""""""""""""""""""""""""""""""""
+" vim-nerdtree (file explorer)
+" vim-surround (tool to easily surround with quotes)
+" vim-tagbar (display structure of a file)
+" vim-syntastic (syntax check)
+" vim-nerdcommenter (comment tool)
+" vim-latexsuite (Latex edition tool)
+" vim-molokai (colorscheme)
+" vim-seti (colorscheme)
+" vim-ale (linter)
+"
+"""""""""""""""""""""""""""""""""""""
+" list of installed plugins (with vim built-in package installer)
+"""""""""""""""""""""""""""""""""""""
+" omnisharp ( .NET tool )
